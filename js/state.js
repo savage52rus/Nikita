@@ -30,73 +30,81 @@ function createPlayer() {
 }
 
 function loadLevel(idx) {
-  currentLevel = idx;
-  level = LEVELS[idx];
+  try {
+    currentLevel = idx;
+    level = LEVELS[idx];
 
-  // Создаём врагов
-  enemies = level.enemies.map(e => ({
-    type: e.type, x: e.x, y: e.y, w: 26, h: 56,
-    vx: 0, vy: 0, onGround: false, facing: -1,
-    patrolMin: e.patrolMin, patrolMax: e.patrolMax,
-    ...ENEMY_TYPES[e.type],
-    state: 'patrol', walkTime: 0, alive: true
-  }));
+    if (!level) {
+      console.error("Ошибка: уровень с индексом " + idx + " не найден!");
+      return;
+    }
 
-  // Создаём осьминогов
-  octopuses = level.coins.map(c => ({
-    x: c.x, y: c.y, r: 10, taken: false,
-    phase: Math.random() * Math.PI * 2,
-    tentaclePhase: Math.random() * Math.PI * 2
-  }));
-
-  // Бонус
-  goldenPower = level.powerup ? {
-    x: level.powerup.x, y: level.powerup.y, r: 18, taken: false,
-    phase: Math.random() * Math.PI * 2
-  } : null;
-
-  // Сброс босса
-  boss = null;
-  bossIntroTimer = 0;
-  bossDefeated = false; 
-
-  if (level.isBossLevel) {
-    boss = {
-      x: 1050, y: 400, w: 40, h: 84,
+    enemies = level.enemies.map(e => ({
+      type: e.type, x: e.x, y: e.y, w: 26, h: 56,
       vx: 0, vy: 0, onGround: false, facing: -1,
-      hp: 5, maxHp: 5, state: 'idle', walkTime: 0,
-      attackTimer: 0, jumpCooldown: 0, throwCooldown: 0,
-      hitFlash: 0, invuln: 0, phase: 1, jumpTargetX: 0
-    };
-    bossIntroTimer = 180;
-    sfx.bossRoar();
-  }
+      patrolMin: e.patrolMin, patrolMax: e.patrolMax,
+      ...ENEMY_TYPES[e.type],
+      state: 'patrol', walkTime: 0, alive: true
+    }));
 
-  // Сброс массивов
-  bags = [];
-  hammers = [];
-  particles = [];
-  camera.x = 0;
-  hammerCooldown = 0;
-  screenShake = 0;
-  stateTimer = 0;
+    octopuses = level.coins.map(c => ({
+      x: c.x, y: c.y, r: 10, taken: false,
+      phase: Math.random() * Math.PI * 2,
+      tentaclePhase: Math.random() * Math.PI * 2
+    }));
 
-  // ВАЖНО: сброс игрока
-  if (player) {
-    player.x = 50;
-    player.y = 100;
-    player.vx = 0;
-    player.vy = 0;
-    player.powerTimer = 0;
-    player.invuln = 0;
+    goldenPower = level.powerup ? {
+      x: level.powerup.x, y: level.powerup.y, r: 18, taken: false,
+      phase: Math.random() * Math.PI * 2
+    } : null;
+
+    boss = null;
+    bossIntroTimer = 0;
+    bossDefeated = false; 
+
+    if (level.isBossLevel) {
+      boss = {
+        x: 1050, y: 400, w: 40, h: 84,
+        vx: 0, vy: 0, onGround: false, facing: -1,
+        hp: 5, maxHp: 5, state: 'idle', walkTime: 0,
+        attackTimer: 0, jumpCooldown: 0, throwCooldown: 0,
+        hitFlash: 0, invuln: 0, phase: 1, jumpTargetX: 0
+      };
+      bossIntroTimer = 180;
+      if (typeof sfx !== 'undefined' && sfx.bossRoar) sfx.bossRoar();
+    }
+
+    bags = [];
+    hammers = [];
+    particles = [];
+    camera.x = 0;
+    hammerCooldown = 0;
+    screenShake = 0;
+    stateTimer = 0;
+
+    if (player) {
+      player.x = 50;
+      player.y = 100;
+      player.vx = 0;
+      player.vy = 0;
+      player.powerTimer = 0;
+      player.invuln = 0;
+      player.hp = player.maxHp; // Восстанавливаем здоровье при загрузке уровня
+    }
+    
+    console.log("Уровень " + (idx + 1) + " успешно загружен. Врагов: " + enemies.length + ", Осьминогов: " + octopuses.length);
+  } catch (err) {
+    console.error("Ошибка при загрузке уровня:", err);
   }
 }
 
 function startGame() {
+  console.log("Запуск игры...");
   player = createPlayer();
   loadLevel(0);
   gameState = 'playing';
-  sfx.buttonClick();
+  if (typeof sfx !== 'undefined' && sfx.buttonClick) sfx.buttonClick();
 }
 
+// Инициализация игрока при старте (чтобы меню не падало)
 player = createPlayer();
