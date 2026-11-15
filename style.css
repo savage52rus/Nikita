@@ -22,7 +22,7 @@ body {
 }
 
 #canvas-wrapper {
-  position: relative; /* Чтобы позиционировать кнопку поверх канваса */
+  position: relative;
   display: flex;
   justify-content: center;
 }
@@ -38,23 +38,59 @@ canvas {
   display: block;
 }
 
-/* Невидимая HTML-кнопка, которая точно ловит тапы */
+/* Невидимая HTML-кнопка старта */
 #html-start-btn {
   position: absolute;
-  /* Позиция подгоняется в main.js через JS, чтобы точно совпасть с отрисовкой */
   background: transparent;
   border: none;
   outline: none;
   cursor: pointer;
   z-index: 10;
-  display: none; /* Скрыта по умолчанию */
+  display: none;
 }
 
-/* Показываем кнопку только на мобильных */
+/* Кнопка музыки */
+#html-music-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(45, 27, 78, 0.7);
+  border: 2px solid rgba(180, 100, 255, 0.5);
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.1s, background 0.1s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+#html-music-btn:active {
+  transform: scale(0.9);
+  background: rgba(180, 100, 255, 0.8);
+}
+
+#html-music-btn.muted {
+  opacity: 0.5;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #888;
+}
+
+/* Показываем кнопки только на мобильных */
 @media (pointer: coarse) {
-  #html-start-btn.active {
-    display: block;
-  }
+  #html-start-btn.active { display: block; }
+  /* На ПК кнопку музыки скрываем, так как есть клавиша M */
+  #html-music-btn { display: flex; } 
+}
+
+/* Скрываем кнопку музыки на ПК, если не хотим её видеть */
+@media (pointer: fine) {
+  #html-music-btn { display: none; }
 }
 
 #mobile-controls {
@@ -70,9 +106,7 @@ canvas {
 }
 
 @media (pointer: coarse) {
-  #mobile-controls {
-    display: flex;
-  }
+  #mobile-controls { display: flex; }
 }
 
 .dpad { display: flex; gap: 15px; }
