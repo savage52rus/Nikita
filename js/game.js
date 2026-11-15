@@ -4,16 +4,19 @@ function update() {
   // ==================== ПЕРЕХОД МЕЖДУ УРОВНЯМИ ====================
   if (gameState === 'levelComplete') {
     stateTimer++;
+    
+    // Ждём 1.5 секунды перед переходом
     if (stateTimer > 90) {
-      // Если это был последний уровень или босс побеждён — в меню
-      if (currentLevel >= LEVELS.length - 1 || bossDefeated) {
+      // Если это был ПОСЛЕДНИЙ уровень (босс) — показываем победу и идём в меню
+      if (currentLevel === LEVELS.length - 1) {
         gameState = 'menu';
         player = createPlayer();
-        bossDefeated = false; // Обязательный сброс
+        bossDefeated = false; 
         stateTimer = 0;
         return;
       }
-      // Иначе грузим следующий уровень
+      
+      // Иначе — загружаем следующий уровень
       loadLevel(currentLevel + 1);
     }
     return;
@@ -26,6 +29,7 @@ function update() {
       gameState = 'menu';
       player = createPlayer();
       bossDefeated = false;
+      stateTimer = 0;
     }
     return;
   }
