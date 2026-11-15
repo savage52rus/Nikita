@@ -3,7 +3,6 @@ const H = 540;
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-// Кроссплатформенный roundRect
 function roundRect(context, x, y, w, h, r) {
   if (r > w / 2) r = w / 2;
   if (r > h / 2) r = h / 2;
@@ -16,7 +15,6 @@ function roundRect(context, x, y, w, h, r) {
   context.closePath();
 }
 
-// Звезда (для военной формы и короны)
 function drawStar(cx, cy, outer, inner) {
   ctx.beginPath();
   for (let i = 0; i < 5; i++) {
@@ -29,7 +27,6 @@ function drawStar(cx, cy, outer, inner) {
   ctx.fill();
 }
 
-// Затемнение/осветление цвета
 function shadeColor(color, percent) {
   const num = parseInt(color.replace('#', ''), 16);
   const amt = Math.round(2.55 * percent);
@@ -39,7 +36,6 @@ function shadeColor(color, percent) {
   return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
-// Спавн частиц
 function spawnParticles(x, y, color, count = 8, speed = 6) {
   for (let i = 0; i < count; i++) {
     particles.push({
@@ -55,7 +51,6 @@ function spawnParticles(x, y, color, count = 8, speed = 6) {
   }
 }
 
-// Проверка пересечения AABB
 function rectsOverlap(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
