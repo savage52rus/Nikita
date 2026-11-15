@@ -52,9 +52,10 @@ function loadLevel(idx) {
     phase: Math.random() * Math.PI * 2
   } : null;
 
+  // Сброс состояния босса и флага победы
   boss = null;
   bossIntroTimer = 0;
-  bossDefeated = false;
+  bossDefeated = false; 
 
   if (level.isBossLevel) {
     boss = {
@@ -75,6 +76,9 @@ function loadLevel(idx) {
   hammerCooldown = 0;
   screenShake = 0;
 
+  // ВАЖНО: сбрасываем таймер экрана перехода!
+  stateTimer = 0; 
+
   if (player) {
     player.x = 50;
     player.y = 100;
@@ -82,8 +86,6 @@ function loadLevel(idx) {
     player.vy = 0;
     player.powerTimer = 0;
   }
-
-  stateTimer = 0;
 }
 
 function startGame() {
