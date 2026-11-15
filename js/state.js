@@ -52,7 +52,6 @@ function loadLevel(idx) {
     phase: Math.random() * Math.PI * 2
   } : null;
 
-  // Сброс состояния босса и флага победы
   boss = null;
   bossIntroTimer = 0;
   bossDefeated = false; 
@@ -75,9 +74,7 @@ function loadLevel(idx) {
   camera.x = 0;
   hammerCooldown = 0;
   screenShake = 0;
-
-  // ВАЖНО: сбрасываем таймер экрана перехода!
-  stateTimer = 0; 
+  stateTimer = 0; // Важно!
 
   if (player) {
     player.x = 50;
