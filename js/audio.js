@@ -36,7 +36,6 @@ const sfx = {
   buttonClick: () => { playTone(400, 0.08, 'square', 0.1, 800); setTimeout(() => playTone(900, 0.15, 'sine', 0.08, 1200), 60); }
 };
 
-// Разблокировка аудио по первому клику
 addEventListener('click', () => {
   if (audio.state === 'suspended') audio.resume();
 }, { once: true });
