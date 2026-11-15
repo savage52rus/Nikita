@@ -218,8 +218,7 @@ function drawLevelComplete() {
   ctx.fillRect(0, 0, W, H);
   ctx.textAlign = 'center';
 
-  // Проверяем, финал это или нет
-  const isFinal = bossDefeated || currentLevel === LEVELS.length - 1;
+  const isFinal = currentLevel === LEVELS.length - 1;
 
   if (isFinal) {
     const glow = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 400);
