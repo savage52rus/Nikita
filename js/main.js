@@ -19,7 +19,7 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mousedown', () => mouse.isDown = true);
 canvas.addEventListener('mouseup', () => mouse.isDown = false);
 
-// --- Функция обновления визуала кнопки музыки ---
+// --- Кнопка музыки ---
 function updateMusicButtonVisual() {
   const btn = document.getElementById('html-music-btn');
   if (!btn) return;
@@ -32,19 +32,16 @@ function updateMusicButtonVisual() {
   }
 }
 
-// --- Обработчик клика по кнопке музыки ---
 document.getElementById('html-music-btn').addEventListener('click', () => {
   soundEnabled = !soundEnabled;
   updateMusicButtonVisual();
-  // Если включили звук, нужно разблокировать аудио-контекст
   if (soundEnabled && audio.state === 'suspended') {
     audio.resume();
   }
-  // Дадим тактильный отклик
   playTone(600, 0.05, 'sine', 0.05);
 });
 
-// --- Позиционирование кнопки старта ---
+// --- Позиционирование невидимой кнопки старта ---
 function updateHtmlStartButton() {
   const htmlBtn = document.getElementById('html-start-btn');
   if (!htmlBtn) return;
@@ -65,18 +62,23 @@ function updateHtmlStartButton() {
   }
 }
 
-// Запуск игры по невидимой кнопке
-let startClicked = false;
+// --- Запуск игры ---
+let isStarting = false;
 document.getElementById('html-start-btn').addEventListener('click', (e) => {
-  if (startClicked) return;
-  startClicked = true;
-  if (gameState === 'menu') {
+  e.preventDefault();
+  if (isStarting || gameState !== 'menu') return;
+  
+  isStarting = true;
+  console.log("Кнопка старта нажата.");
+  
+  // Небольшая задержка, чтобы избежать конфликтов событий на мобильных
+  setTimeout(() => {
     startGame();
-  }
-  setTimeout(() => { startClicked = false; }, 500);
+    isStarting = false;
+  }, 50);
 });
 
-// --- Обработка касаний по канвасу ---
+// --- Обработка касаний ---
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const touch = e.touches[0];
@@ -93,9 +95,16 @@ function bindMobileButton(id, keyCode) {
   const press = (e) => {
     e.preventDefault();
     keys[keyCode] = true;
-    if (keyCode === 'Space' && gameState === 'menu') {
-      startGame();
+    
+    // Запуск игры, если нажата A в меню
+    if (keyCode === 'Space' && gameState === 'menu' && !isStarting) {
+      isStarting = true;
+      setTimeout(() => {
+        startGame();
+        isStarting = false;
+      }, 50);
     }
+    
     if (keyCode === 'KeyE') btn.style.transform = 'scale(0.85)';
   };
   
@@ -132,12 +141,24 @@ function draw() {
 
 function loop() {
   globalTime = Date.now();
-  if (gameState !== 'menu') update();
-  else menuTime += 16;
-  draw();
+  if (gameState !== 'menu') {
+    try {
+      update();
+    } catch (err) {
+      console.error("Ошибка в update():", err);
+    }
+  } else {
+    menuTime += 16;
+  }
+  
+  try {
+    draw();
+  } catch (err) {
+    console.error("Ошибка в draw():", err);
+  }
+  
   requestAnimationFrame(loop);
 }
 
-// Инициализация визуала кнопки музыки при загрузке
 updateMusicButtonVisual();
 loop();
