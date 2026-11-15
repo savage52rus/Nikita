@@ -69,11 +69,18 @@ function bindMobileButton(id, keyCode) {
     if (keyCode === 'Space' && gameState === 'menu') {
       startGame();
     }
+    // Для кнопки E можно добавить визуальный эффект, если нужно
+    if (keyCode === 'KeyE') {
+      btn.style.transform = 'scale(0.85)';
+    }
   };
   
   const release = (e) => {
     e.preventDefault();
     keys[keyCode] = false;
+    if (keyCode === 'KeyE') {
+      btn.style.transform = '';
+    }
   };
 
   btn.addEventListener('touchstart', press, { passive: false });
@@ -85,9 +92,11 @@ function bindMobileButton(id, keyCode) {
   btn.addEventListener('mouseleave', release);
 }
 
+// Привязываем кнопки
 bindMobileButton('btn-left', 'ArrowLeft');
 bindMobileButton('btn-right', 'ArrowRight');
-bindMobileButton('btn-action', 'Space');
+bindMobileButton('btn-action', 'Space'); // Прыжок
+bindMobileButton('btn-throw', 'KeyE');   // Метание молота
 
 // --- Игровой цикл ---
 function draw() {
@@ -97,7 +106,7 @@ function draw() {
   } else {
     drawGame();
   }
-  updateHtmlStartButton(); // Обновляем позицию невидимой кнопки каждый кадр
+  updateHtmlStartButton();
 }
 
 function loop() {
