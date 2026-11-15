@@ -4,7 +4,10 @@ const mouse = { x: 0, y: 0, isDown: false };
 addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
-  if (e.code === 'KeyM') soundEnabled = !soundEnabled;
+  if (e.code === 'KeyM') {
+    soundEnabled = !soundEnabled;
+    updateMusicButtonVisual();
+  }
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
@@ -16,21 +19,43 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mousedown', () => mouse.isDown = true);
 canvas.addEventListener('mouseup', () => mouse.isDown = false);
 
-// --- Функция позиционирования невидимой HTML-кнопки ---
+// --- Функция обновления визуала кнопки музыки ---
+function updateMusicButtonVisual() {
+  const btn = document.getElementById('html-music-btn');
+  if (!btn) return;
+  if (soundEnabled) {
+    btn.textContent = '🎵';
+    btn.classList.remove('muted');
+  } else {
+    btn.textContent = '🔇';
+    btn.classList.add('muted');
+  }
+}
+
+// --- Обработчик клика по кнопке музыки ---
+document.getElementById('html-music-btn').addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  updateMusicButtonVisual();
+  // Если включили звук, нужно разблокировать аудио-контекст
+  if (soundEnabled && audio.state === 'suspended') {
+    audio.resume();
+  }
+  // Дадим тактильный отклик
+  playTone(600, 0.05, 'sine', 0.05);
+});
+
+// --- Позиционирование кнопки старта ---
 function updateHtmlStartButton() {
   const htmlBtn = document.getElementById('html-start-btn');
   if (!htmlBtn) return;
 
   if (gameState === 'menu') {
     htmlBtn.classList.add('active');
-    
     const rect = canvas.getBoundingClientRect();
     const scaleX = rect.width / W;
     const scaleY = rect.height / H;
-    
     const btn = startButton;
     
-    // Позиционируем точно над нарисованной кнопкой
     htmlBtn.style.left = (btn.x * scaleX) + 'px';
     htmlBtn.style.top = (btn.y * scaleY) + 'px';
     htmlBtn.style.width = (btn.w * scaleX) + 'px';
@@ -40,20 +65,18 @@ function updateHtmlStartButton() {
   }
 }
 
-// --- Обработчик клика по невидимой стартовой кнопке ---
+// Запуск игры по невидимой кнопке
 let startClicked = false;
 document.getElementById('html-start-btn').addEventListener('click', (e) => {
   if (startClicked) return;
   startClicked = true;
-  
   if (gameState === 'menu') {
     startGame();
   }
-  
   setTimeout(() => { startClicked = false; }, 500);
 });
 
-// --- Обработка касаний по канвасу (для наведения на Никиту) ---
+// --- Обработка касаний по канвасу ---
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const touch = e.touches[0];
@@ -70,12 +93,9 @@ function bindMobileButton(id, keyCode) {
   const press = (e) => {
     e.preventDefault();
     keys[keyCode] = true;
-    
-    // Запуск игры по кнопке "A" в меню
     if (keyCode === 'Space' && gameState === 'menu') {
       startGame();
     }
-    
     if (keyCode === 'KeyE') btn.style.transform = 'scale(0.85)';
   };
   
@@ -94,11 +114,10 @@ function bindMobileButton(id, keyCode) {
   btn.addEventListener('mouseleave', release);
 }
 
-// Привязываем кнопки
 bindMobileButton('btn-left', 'ArrowLeft');
 bindMobileButton('btn-right', 'ArrowRight');
-bindMobileButton('btn-action', 'Space'); // Прыжок
-bindMobileButton('btn-throw', 'KeyE');   // Метание молота
+bindMobileButton('btn-action', 'Space');
+bindMobileButton('btn-throw', 'KeyE');
 
 // --- Игровой цикл ---
 function draw() {
@@ -119,4 +138,6 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
+// Инициализация визуала кнопки музыки при загрузке
+updateMusicButtonVisual();
 loop();
