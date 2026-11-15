@@ -8,7 +8,6 @@ body {
   min-height: 100vh;
   overflow: hidden;
   font-family: 'Segoe UI', sans-serif;
-  /* Отключаем выделение и зум на мобильных */
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -22,6 +21,12 @@ body {
   max-height: 100vh;
 }
 
+#canvas-wrapper {
+  position: relative; /* Чтобы позиционировать кнопку поверх канваса */
+  display: flex;
+  justify-content: center;
+}
+
 canvas {
   background: #050510;
   box-shadow:
@@ -29,14 +34,31 @@ canvas {
     0 0 100px rgba(120, 60, 220, 0.2);
   border-radius: 8px;
   max-width: 100vw;
-  /* Ограничиваем высоту, чтобы влезли кнопки */
   max-height: calc(100vh - 120px);
   display: block;
 }
 
-/* Контейнер для мобильных кнопок */
+/* Невидимая HTML-кнопка, которая точно ловит тапы */
+#html-start-btn {
+  position: absolute;
+  /* Позиция подгоняется в main.js через JS, чтобы точно совпасть с отрисовкой */
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  z-index: 10;
+  display: none; /* Скрыта по умолчанию */
+}
+
+/* Показываем кнопку только на мобильных */
+@media (pointer: coarse) {
+  #html-start-btn.active {
+    display: block;
+  }
+}
+
 #mobile-controls {
-  display: none; /* По умолчанию скрыто (для ПК) */
+  display: none;
   width: 100%;
   max-width: 960px;
   padding: 10px 20px;
@@ -47,22 +69,14 @@ canvas {
   margin-top: 5px;
 }
 
-/* Показываем кнопки только на сенсорных экранах */
 @media (pointer: coarse) {
   #mobile-controls {
     display: flex;
   }
 }
 
-.dpad {
-  display: flex;
-  gap: 15px;
-}
-
-.actions {
-  display: flex;
-  gap: 15px;
-}
+.dpad { display: flex; gap: 15px; }
+.actions { display: flex; gap: 15px; }
 
 .btn {
   width: 70px;
