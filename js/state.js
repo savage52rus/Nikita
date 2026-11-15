@@ -33,6 +33,7 @@ function loadLevel(idx) {
   currentLevel = idx;
   level = LEVELS[idx];
 
+  // Создаём врагов
   enemies = level.enemies.map(e => ({
     type: e.type, x: e.x, y: e.y, w: 26, h: 56,
     vx: 0, vy: 0, onGround: false, facing: -1,
@@ -41,17 +42,20 @@ function loadLevel(idx) {
     state: 'patrol', walkTime: 0, alive: true
   }));
 
+  // Создаём осьминогов
   octopuses = level.coins.map(c => ({
     x: c.x, y: c.y, r: 10, taken: false,
     phase: Math.random() * Math.PI * 2,
     tentaclePhase: Math.random() * Math.PI * 2
   }));
 
+  // Бонус
   goldenPower = level.powerup ? {
     x: level.powerup.x, y: level.powerup.y, r: 18, taken: false,
     phase: Math.random() * Math.PI * 2
   } : null;
 
+  // Сброс босса
   boss = null;
   bossIntroTimer = 0;
   bossDefeated = false; 
@@ -68,20 +72,23 @@ function loadLevel(idx) {
     sfx.bossRoar();
   }
 
+  // Сброс массивов
   bags = [];
   hammers = [];
   particles = [];
   camera.x = 0;
   hammerCooldown = 0;
   screenShake = 0;
-  stateTimer = 0; // Важно!
+  stateTimer = 0;
 
+  // ВАЖНО: сброс игрока
   if (player) {
     player.x = 50;
     player.y = 100;
     player.vx = 0;
     player.vy = 0;
     player.powerTimer = 0;
+    player.invuln = 0;
   }
 }
 
