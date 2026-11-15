@@ -217,7 +217,11 @@ function drawLevelComplete() {
   ctx.fillStyle = 'rgba(0,0,0,0.85)';
   ctx.fillRect(0, 0, W, H);
   ctx.textAlign = 'center';
-  if (bossDefeated) {
+
+  // Проверяем, финал это или нет
+  const isFinal = bossDefeated || currentLevel === LEVELS.length - 1;
+
+  if (isFinal) {
     const glow = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 400);
     glow.addColorStop(0, 'rgba(255, 215, 0, 0.2)');
     glow.addColorStop(1, 'rgba(255, 215, 0, 0)');
@@ -240,11 +244,12 @@ function drawLevelComplete() {
     ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 32px sans-serif';
     ctx.fillText('Итоговый счёт: ' + player.score, W / 2, H / 2 + 80);
+    
     if (stateTimer > 120) {
       const blink = Math.sin(stateTimer * 0.1) * 0.5 + 0.5;
       ctx.fillStyle = `rgba(255, 215, 0, ${0.5 + blink * 0.5})`;
       ctx.font = '20px sans-serif';
-      ctx.fillText('Нажмите ПРОБЕЛ для рестарта', W / 2, H / 2 + 140);
+      ctx.fillText('Нажмите ПРОБЕЛ для возврата в меню', W / 2, H / 2 + 140);
     }
   } else {
     ctx.fillStyle = '#2ecc71';
@@ -253,6 +258,9 @@ function drawLevelComplete() {
     ctx.fillStyle = '#fff';
     ctx.font = '24px sans-serif';
     ctx.fillText('Очки: ' + player.score, W / 2, H / 2 + 30);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '18px sans-serif';
+    ctx.fillText('Следующий уровень...', W / 2, H / 2 + 80);
   }
   ctx.textAlign = 'left';
 }
@@ -280,7 +288,7 @@ function drawGameOver() {
     const blink = Math.sin(stateTimer * 0.1) * 0.5 + 0.5;
     ctx.fillStyle = `rgba(255, 215, 0, ${0.5 + blink * 0.5})`;
     ctx.font = 'bold 22px sans-serif';
-    ctx.fillText('Нажмите ПРОБЕЛ для рестарта', W / 2, H / 2 + 80);
+    ctx.fillText('Нажмите ПРОБЕЛ для возврата в меню', W / 2, H / 2 + 80);
   }
   ctx.textAlign = 'left';
 }
