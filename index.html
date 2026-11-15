@@ -8,7 +8,11 @@
 </head>
 <body>
   <div id="game-container">
-    <canvas id="game" width="960" height="540"></canvas>
+    <div id="canvas-wrapper">
+      <canvas id="game" width="960" height="540"></canvas>
+      <!-- Невидимая кнопка для мобильных устройств поверх канваса -->
+      <button id="html-start-btn"></button>
+    </div>
     
     <!-- Виртуальные кнопки для смартфона -->
     <div id="mobile-controls">
@@ -22,7 +26,6 @@
     </div>
   </div>
 
-  <!-- Порядок важен: зависимости подключаются раньше -->
   <script src="js/config.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/utils.js"></script>
