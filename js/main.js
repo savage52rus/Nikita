@@ -24,17 +24,15 @@ function updateHtmlStartButton() {
   if (gameState === 'menu') {
     htmlBtn.classList.add('active');
     
-    // Получаем масштаб канваса
     const rect = canvas.getBoundingClientRect();
     const scaleX = rect.width / W;
     const scaleY = rect.height / H;
     
-    // Координаты кнопки из menu.js
     const btn = startButton;
     
-    // Позиционируем невидимую кнопку точно над нарисованной
-    htmlBtn.style.left = (rect.left - canvas.getBoundingClientRect().left + btn.x * scaleX) + 'px';
-    htmlBtn.style.top = (rect.top - canvas.getBoundingClientRect().top + btn.y * scaleY) + 'px';
+    // Позиционируем точно над нарисованной кнопкой
+    htmlBtn.style.left = (btn.x * scaleX) + 'px';
+    htmlBtn.style.top = (btn.y * scaleY) + 'px';
     htmlBtn.style.width = (btn.w * scaleX) + 'px';
     htmlBtn.style.height = (btn.h * scaleY) + 'px';
   } else {
@@ -42,11 +40,17 @@ function updateHtmlStartButton() {
   }
 }
 
-// Обработчик клика по невидимой кнопке
-document.getElementById('html-start-btn').addEventListener('click', () => {
+// --- Обработчик клика по невидимой стартовой кнопке ---
+let startClicked = false;
+document.getElementById('html-start-btn').addEventListener('click', (e) => {
+  if (startClicked) return;
+  startClicked = true;
+  
   if (gameState === 'menu') {
     startGame();
   }
+  
+  setTimeout(() => { startClicked = false; }, 500);
 });
 
 // --- Обработка касаний по канвасу (для наведения на Никиту) ---
@@ -66,21 +70,19 @@ function bindMobileButton(id, keyCode) {
   const press = (e) => {
     e.preventDefault();
     keys[keyCode] = true;
+    
+    // Запуск игры по кнопке "A" в меню
     if (keyCode === 'Space' && gameState === 'menu') {
       startGame();
     }
-    // Для кнопки E можно добавить визуальный эффект, если нужно
-    if (keyCode === 'KeyE') {
-      btn.style.transform = 'scale(0.85)';
-    }
+    
+    if (keyCode === 'KeyE') btn.style.transform = 'scale(0.85)';
   };
   
   const release = (e) => {
     e.preventDefault();
     keys[keyCode] = false;
-    if (keyCode === 'KeyE') {
-      btn.style.transform = '';
-    }
+    if (keyCode === 'KeyE') btn.style.transform = '';
   };
 
   btn.addEventListener('touchstart', press, { passive: false });
