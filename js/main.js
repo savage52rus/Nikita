@@ -1,7 +1,6 @@
 const keys = {};
 const mouse = { x: 0, y: 0, isDown: false };
 
-// --- Обработка клавиатуры ---
 addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
@@ -9,7 +8,6 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
-// --- Обработка мыши (ПК) ---
 canvas.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
   mouse.x = (e.clientX - rect.left) * (W / rect.width);
@@ -18,34 +16,46 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mousedown', () => mouse.isDown = true);
 canvas.addEventListener('mouseup', () => mouse.isDown = false);
 
-// --- Универсальная функция для получения координат касания/клика ---
-function getCanvasCoords(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  return {
-    x: (clientX - rect.left) * (W / rect.width),
-    y: (clientY - rect.top) * (H / rect.height)
-  };
+// --- Функция позиционирования невидимой HTML-кнопки ---
+function updateHtmlStartButton() {
+  const htmlBtn = document.getElementById('html-start-btn');
+  if (!htmlBtn) return;
+
+  if (gameState === 'menu') {
+    htmlBtn.classList.add('active');
+    
+    // Получаем масштаб канваса
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = rect.width / W;
+    const scaleY = rect.height / H;
+    
+    // Координаты кнопки из menu.js
+    const btn = startButton;
+    
+    // Позиционируем невидимую кнопку точно над нарисованной
+    htmlBtn.style.left = (rect.left - canvas.getBoundingClientRect().left + btn.x * scaleX) + 'px';
+    htmlBtn.style.top = (rect.top - canvas.getBoundingClientRect().top + btn.y * scaleY) + 'px';
+    htmlBtn.style.width = (btn.w * scaleX) + 'px';
+    htmlBtn.style.height = (btn.h * scaleY) + 'px';
+  } else {
+    htmlBtn.classList.remove('active');
+  }
 }
 
-// --- Обработка касаний по канвасу (для меню) ---
+// Обработчик клика по невидимой кнопке
+document.getElementById('html-start-btn').addEventListener('click', () => {
+  if (gameState === 'menu') {
+    startGame();
+  }
+});
+
+// --- Обработка касаний по канвасу (для наведения на Никиту) ---
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const touch = e.touches[0];
-  const coords = getCanvasCoords(touch.clientX, touch.clientY);
-  
-  // Обновляем координаты "мыши" для наведения на Никиту
-  mouse.x = coords.x;
-  mouse.y = coords.y;
-  
-  // Проверяем, попал ли палец в кнопку "Биться за смены"
-  if (gameState === 'menu') {
-    const btn = startButton;
-    if (mouse.x >= btn.x && mouse.x <= btn.x + btn.w &&
-        mouse.y >= btn.y && mouse.y <= btn.y + btn.h) {
-      startGame();
-      return;
-    }
-  }
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = (touch.clientX - rect.left) * (W / rect.width);
+  mouse.y = (touch.clientY - rect.top) * (H / rect.height);
 }, { passive: false });
 
 // --- Виртуальные кнопки ---
@@ -56,7 +66,6 @@ function bindMobileButton(id, keyCode) {
   const press = (e) => {
     e.preventDefault();
     keys[keyCode] = true;
-    // Если нажата кнопка "A", и мы в меню, запускаем игру (на всякий случай)
     if (keyCode === 'Space' && gameState === 'menu') {
       startGame();
     }
@@ -71,16 +80,14 @@ function bindMobileButton(id, keyCode) {
   btn.addEventListener('touchend', release, { passive: false });
   btn.addEventListener('touchcancel', release, { passive: false });
   
-  // Для тестирования на ПК
   btn.addEventListener('mousedown', press);
   btn.addEventListener('mouseup', release);
   btn.addEventListener('mouseleave', release);
 }
 
-// Привязываем кнопки
 bindMobileButton('btn-left', 'ArrowLeft');
 bindMobileButton('btn-right', 'ArrowRight');
-bindMobileButton('btn-action', 'Space'); // Прыжок
+bindMobileButton('btn-action', 'Space');
 
 // --- Игровой цикл ---
 function draw() {
@@ -90,6 +97,7 @@ function draw() {
   } else {
     drawGame();
   }
+  updateHtmlStartButton(); // Обновляем позицию невидимой кнопки каждый кадр
 }
 
 function loop() {
