@@ -18,20 +18,35 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mousedown', () => mouse.isDown = true);
 canvas.addEventListener('mouseup', () => mouse.isDown = false);
 
+// --- Универсальная функция для получения координат касания/клика ---
+function getCanvasCoords(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left) * (W / rect.width),
+    y: (clientY - rect.top) * (H / rect.height)
+  };
+}
+
 // --- Обработка касаний по канвасу (для меню) ---
 canvas.addEventListener('touchstart', e => {
-  e.preventDefault(); // Убираем зум и скролл
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  mouse.x = (touch.clientX - rect.left) * (W / rect.width);
-  mouse.y = (touch.clientY - rect.top) * (H / rect.height);
-  mouse.isDown = true;
-}, { passive: false });
-
-canvas.addEventListener('touchend', e => {
   e.preventDefault();
-  mouse.isDown = false;
-});
+  const touch = e.touches[0];
+  const coords = getCanvasCoords(touch.clientX, touch.clientY);
+  
+  // Обновляем координаты "мыши" для наведения на Никиту
+  mouse.x = coords.x;
+  mouse.y = coords.y;
+  
+  // Проверяем, попал ли палец в кнопку "Биться за смены"
+  if (gameState === 'menu') {
+    const btn = startButton;
+    if (mouse.x >= btn.x && mouse.x <= btn.x + btn.w &&
+        mouse.y >= btn.y && mouse.y <= btn.y + btn.h) {
+      startGame();
+      return;
+    }
+  }
+}, { passive: false });
 
 // --- Виртуальные кнопки ---
 function bindMobileButton(id, keyCode) {
@@ -41,9 +56,9 @@ function bindMobileButton(id, keyCode) {
   const press = (e) => {
     e.preventDefault();
     keys[keyCode] = true;
-    // Если это кнопка действия (прыжок/молот), эмулируем одиночное нажатие для меню, если нужно
-    if (keyCode === 'Space') {
-      // Принудительный прыжок
+    // Если нажата кнопка "A", и мы в меню, запускаем игру (на всякий случай)
+    if (keyCode === 'Space' && gameState === 'menu') {
+      startGame();
     }
   };
   
@@ -56,7 +71,7 @@ function bindMobileButton(id, keyCode) {
   btn.addEventListener('touchend', release, { passive: false });
   btn.addEventListener('touchcancel', release, { passive: false });
   
-  // Для тестирования на ПК (мышкой по кнопкам)
+  // Для тестирования на ПК
   btn.addEventListener('mousedown', press);
   btn.addEventListener('mouseup', release);
   btn.addEventListener('mouseleave', release);
@@ -66,8 +81,6 @@ function bindMobileButton(id, keyCode) {
 bindMobileButton('btn-left', 'ArrowLeft');
 bindMobileButton('btn-right', 'ArrowRight');
 bindMobileButton('btn-action', 'Space'); // Прыжок
-// Если нужно метать молот, можно добавить вторую кнопку с 'KeyE', 
-// но пока кнопка "A" делает прыжок, так как это основа геймплея.
 
 // --- Игровой цикл ---
 function draw() {
