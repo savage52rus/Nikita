@@ -1,28 +1,36 @@
 function update() {
   if (gameState === 'menu') return;
 
+  // ==================== ПЕРЕХОД МЕЖДУ УРОВНЯМИ ====================
   if (gameState === 'levelComplete') {
     stateTimer++;
     if (stateTimer > 90) {
-      if (bossDefeated || currentLevel >= LEVELS.length - 1) {
+      // Если это был последний уровень или босс побеждён — в меню
+      if (currentLevel >= LEVELS.length - 1 || bossDefeated) {
         gameState = 'menu';
         player = createPlayer();
+        bossDefeated = false; // Обязательный сброс
         stateTimer = 0;
         return;
       }
-      if (currentLevel < LEVELS.length - 1) loadLevel(currentLevel + 1);
+      // Иначе грузим следующий уровень
+      loadLevel(currentLevel + 1);
     }
     return;
   }
+
+  // ==================== ЭКРАН ПРОИГРЫША ====================
   if (gameState === 'gameOver') {
     stateTimer++;
     if (stateTimer > 120 && keys['Space']) {
       gameState = 'menu';
       player = createPlayer();
+      bossDefeated = false;
     }
     return;
   }
 
+  // ==================== ИГРОВОЙ ПРОЦЕСС ====================
   if (bossIntroTimer > 0) {
     bossIntroTimer--;
     player.vx = 0;
@@ -37,6 +45,7 @@ function update() {
   const currentSpeed = powered ? BASE_SPEED * 1.2 : BASE_SPEED;
   const currentJump = powered ? BASE_JUMP * 1.15 : BASE_JUMP;
 
+  // Управление
   if (bossIntroTimer <= 0) {
     if (keys['ArrowLeft'] || keys['KeyA']) { player.vx = -currentSpeed; player.facing = -1; }
     else if (keys['ArrowRight'] || keys['KeyD']) { player.vx = currentSpeed; player.facing = 1; }
@@ -66,6 +75,7 @@ function update() {
   }
   if (hammerCooldown > 0) hammerCooldown--;
 
+  // Физика игрока
   player.vy += GRAVITY;
   player.x += player.vx;
   for (const p of level.platforms) {
@@ -99,6 +109,7 @@ function update() {
   if (player.landTime > 0) player.landTime -= 1;
   if (player.invuln > 0) player.invuln -= 1;
 
+  // Таймер бонуса
   if (player.powerTimer > 0) {
     player.powerTimer -= 1;
     if (player.powerTimer === 0) {
@@ -116,6 +127,7 @@ function update() {
     }
   }
 
+  // Падение вниз
   if (player.y > H + 100) {
     player.hp -= 1;
     player.invuln = 60;
@@ -127,7 +139,7 @@ function update() {
     if (currentLevel === 4) player.x = 50;
   }
 
-  // БОСС
+  // ==================== БОСС ====================
   if (boss && boss.hp > 0 && bossIntroTimer <= 0) {
     boss.vy += GRAVITY;
     boss.x += boss.vx;
@@ -247,7 +259,7 @@ function update() {
     }
   }
 
-  // МОЛОТЫ
+  // ==================== МОЛОТЫ ====================
   for (let i = hammers.length - 1; i >= 0; i--) {
     const h = hammers[i];
     h.vy += GRAVITY * 0.5;
@@ -328,7 +340,7 @@ function update() {
     if (destroyed) hammers.splice(i, 1);
   }
 
-  // ОСЬМИНОГИ
+  // ==================== ОСЬМИНОГИ ====================
   for (const o of octopuses) {
     if (!o.taken && Math.hypot((player.x + player.w / 2) - o.x, (player.y + player.h / 2) - o.y) < o.r + 15) {
       o.taken = true;
@@ -339,7 +351,7 @@ function update() {
     }
   }
 
-  // БОНУС
+  // ==================== БОНУС ====================
   if (goldenPower && !goldenPower.taken) {
     const dx = (player.x + player.w / 2) - goldenPower.x;
     const dy = (player.y + player.h / 2) - goldenPower.y;
@@ -354,7 +366,7 @@ function update() {
     }
   }
 
-  // ВРАГИ
+  // ==================== ВРАГИ ====================
   for (const e of enemies) {
     if (!e.alive) continue;
     e.vy += GRAVITY;
@@ -431,7 +443,7 @@ function update() {
     }
   }
 
-  // СУМОЧКИ
+  // ==================== СУМОЧКИ ====================
   for (let i = bags.length - 1; i >= 0; i--) {
     const b = bags[i];
     b.vy += GRAVITY * 0.6;
@@ -466,7 +478,7 @@ function update() {
     if (b.life <= 0 || b.y > H + 100) bags.splice(i, 1);
   }
 
-  // ЧАСТИЦЫ
+  // ==================== ЧАСТИЦЫ ====================
   for (let i = particles.length - 1; i >= 0; i--) {
     const pt = particles[i];
     pt.x += pt.vx;
@@ -477,11 +489,12 @@ function update() {
     if (pt.life <= 0) particles.splice(i, 1);
   }
 
-  // КАМЕРА
+  // ==================== КАМЕРА ====================
   const targetCamX = player.x + player.w / 2 - W / 2;
   camera.x += (targetCamX - camera.x) * 0.1;
   camera.x = Math.max(0, Math.min(level.width - W, camera.x));
 
+  // ==================== ПРОВЕРКА ВЫХОДА ====================
   if (rectsOverlap(player, level.exit) && !level.isBossLevel) {
     gameState = 'levelComplete';
     stateTimer = 0;
