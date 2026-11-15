@@ -2,12 +2,27 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Никита. Битва за смены</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="game" width="960" height="540"></canvas>
+  <div id="game-container">
+    <canvas id="game" width="960" height="540"></canvas>
+    
+    <!-- Виртуальные кнопки для смартфона -->
+    <div id="mobile-controls">
+      <div class="dpad">
+        <button class="btn" id="btn-left">◀</button>
+        <button class="btn" id="btn-right">▶</button>
+      </div>
+      <div class="actions">
+        <button class="btn action-btn" id="btn-action">A</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Порядок важен: зависимости подключаются раньше -->
   <script src="js/config.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/utils.js"></script>
