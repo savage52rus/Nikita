@@ -8,6 +8,18 @@ body {
   min-height: 100vh;
   overflow: hidden;
   font-family: 'Segoe UI', sans-serif;
+  /* Отключаем выделение и зум на мобильных */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
 canvas {
@@ -17,5 +29,72 @@ canvas {
     0 0 100px rgba(120, 60, 220, 0.2);
   border-radius: 8px;
   max-width: 100vw;
-  max-height: 100vh;
+  /* Ограничиваем высоту, чтобы влезли кнопки */
+  max-height: calc(100vh - 120px);
+  display: block;
+}
+
+/* Контейнер для мобильных кнопок */
+#mobile-controls {
+  display: none; /* По умолчанию скрыто (для ПК) */
+  width: 100%;
+  max-width: 960px;
+  padding: 10px 20px;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 5, 20, 0.8);
+  border-radius: 0 0 8px 8px;
+  margin-top: 5px;
+}
+
+/* Показываем кнопки только на сенсорных экранах */
+@media (pointer: coarse) {
+  #mobile-controls {
+    display: flex;
+  }
+}
+
+.dpad {
+  display: flex;
+  gap: 15px;
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid rgba(180, 100, 255, 0.5);
+  background: rgba(45, 27, 78, 0.8);
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.1s, background 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.9);
+  background: rgba(180, 100, 255, 0.8);
+}
+
+.action-btn {
+  width: 85px;
+  height: 85px;
+  background: rgba(255, 107, 157, 0.2);
+  border-color: rgba(255, 107, 157, 0.8);
+  font-size: 28px;
+}
+
+.action-btn:active {
+  background: rgba(255, 107, 157, 0.6);
 }
