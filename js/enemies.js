@@ -319,7 +319,7 @@ function drawBoss(b, time) {
   ctx.globalAlpha /= 0.85;
   drawArm(bodyW * 0.35, -armSwing);
 
-  ctx.fillStyle = skinGrad || skinBase;
+  ctx.fillStyle = skinBase;
   ctx.fillRect(-5, -hh * 0.85, 10, 6);
   const faceGrad = ctx.createRadialGradient(-3, -hh * 0.95, 0, 0, -hh * 0.92, 15);
   faceGrad.addColorStop(0, skinBase);
