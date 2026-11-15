@@ -2,7 +2,7 @@
 const GRAVITY = 0.6;
 const BASE_SPEED = 4;
 const BASE_JUMP = -12;
-const POWER_DURATION = 600; // 10 секунд при 60 FPS
+const POWER_DURATION = 600;
 
 // ==================== УРОВНИ ====================
 const LEVELS = [
