@@ -35,7 +35,7 @@ function loadLevel(idx) {
     level = LEVELS[idx];
 
     if (!level) {
-      console.error("Ошибка: уровень с индексом " + idx + " не найден!");
+      console.error("Уровень не найден: индекс " + idx);
       return;
     }
 
@@ -89,22 +89,18 @@ function loadLevel(idx) {
       player.vy = 0;
       player.powerTimer = 0;
       player.invuln = 0;
-      player.hp = player.maxHp; // Восстанавливаем здоровье при загрузке уровня
+      player.hp = player.maxHp;
     }
-    
-    console.log("Уровень " + (idx + 1) + " успешно загружен. Врагов: " + enemies.length + ", Осьминогов: " + octopuses.length);
   } catch (err) {
     console.error("Ошибка при загрузке уровня:", err);
   }
 }
 
 function startGame() {
-  console.log("Запуск игры...");
   player = createPlayer();
-  loadLevel(0);
   gameState = 'playing';
+  loadLevel(0);
   if (typeof sfx !== 'undefined' && sfx.buttonClick) sfx.buttonClick();
 }
 
-// Инициализация игрока при старте (чтобы меню не падало)
 player = createPlayer();
