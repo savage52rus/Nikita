@@ -1,13 +1,13 @@
 function update() {
   if (gameState === 'menu') return;
 
-  // ==================== ПЕРЕХОД МЕЖДУ УРОВНЯМИ ====================
+  // ==================== ЭКРАН ПЕРЕХОДА ====================
   if (gameState === 'levelComplete') {
     stateTimer++;
     
-    // Ждём 1.5 секунды перед переходом
+    // Ждём 1.5 секунды (90 кадров)
     if (stateTimer > 90) {
-      // Если это был ПОСЛЕДНИЙ уровень (босс) — показываем победу и идём в меню
+      // Если это был последний уровень (босс) — в меню
       if (currentLevel === LEVELS.length - 1) {
         gameState = 'menu';
         player = createPlayer();
@@ -16,13 +16,15 @@ function update() {
         return;
       }
       
-      // Иначе — загружаем следующий уровень
-      loadLevel(currentLevel + 1);
+      // Иначе загружаем следующий уровень
+      const nextLevel = currentLevel + 1;
+      loadLevel(nextLevel); 
+      // loadLevel сам сбросит stateTimer в 0
     }
     return;
   }
 
-  // ==================== ЭКРАН ПРОИГРЫША ====================
+  // ==================== GAME OVER ====================
   if (gameState === 'gameOver') {
     stateTimer++;
     if (stateTimer > 120 && keys['Space']) {
@@ -38,7 +40,7 @@ function update() {
   if (bossIntroTimer > 0) {
     bossIntroTimer--;
     player.vx = 0;
-    if (bossIntroTimer === 0) boss.state = 'chase';
+    if (bossIntroTimer === 0 && boss) boss.state = 'chase';
   }
 
   if (screenShake > 0) screenShake *= 0.9;
@@ -143,7 +145,7 @@ function update() {
     if (currentLevel === 4) player.x = 50;
   }
 
-  // ==================== БОСС ====================
+  // БОСС
   if (boss && boss.hp > 0 && bossIntroTimer <= 0) {
     boss.vy += GRAVITY;
     boss.x += boss.vx;
@@ -263,7 +265,7 @@ function update() {
     }
   }
 
-  // ==================== МОЛОТЫ ====================
+  // МОЛОТЫ
   for (let i = hammers.length - 1; i >= 0; i--) {
     const h = hammers[i];
     h.vy += GRAVITY * 0.5;
@@ -344,7 +346,7 @@ function update() {
     if (destroyed) hammers.splice(i, 1);
   }
 
-  // ==================== ОСЬМИНОГИ ====================
+  // ОСЬМИНОГИ
   for (const o of octopuses) {
     if (!o.taken && Math.hypot((player.x + player.w / 2) - o.x, (player.y + player.h / 2) - o.y) < o.r + 15) {
       o.taken = true;
@@ -355,7 +357,7 @@ function update() {
     }
   }
 
-  // ==================== БОНУС ====================
+  // БОНУС
   if (goldenPower && !goldenPower.taken) {
     const dx = (player.x + player.w / 2) - goldenPower.x;
     const dy = (player.y + player.h / 2) - goldenPower.y;
@@ -370,7 +372,7 @@ function update() {
     }
   }
 
-  // ==================== ВРАГИ ====================
+  // ВРАГИ
   for (const e of enemies) {
     if (!e.alive) continue;
     e.vy += GRAVITY;
@@ -447,7 +449,7 @@ function update() {
     }
   }
 
-  // ==================== СУМОЧКИ ====================
+  // СУМОЧКИ
   for (let i = bags.length - 1; i >= 0; i--) {
     const b = bags[i];
     b.vy += GRAVITY * 0.6;
@@ -482,7 +484,7 @@ function update() {
     if (b.life <= 0 || b.y > H + 100) bags.splice(i, 1);
   }
 
-  // ==================== ЧАСТИЦЫ ====================
+  // ЧАСТИЦЫ
   for (let i = particles.length - 1; i >= 0; i--) {
     const pt = particles[i];
     pt.x += pt.vx;
@@ -493,12 +495,12 @@ function update() {
     if (pt.life <= 0) particles.splice(i, 1);
   }
 
-  // ==================== КАМЕРА ====================
+  // КАМЕРА
   const targetCamX = player.x + player.w / 2 - W / 2;
   camera.x += (targetCamX - camera.x) * 0.1;
   camera.x = Math.max(0, Math.min(level.width - W, camera.x));
 
-  // ==================== ПРОВЕРКА ВЫХОДА ====================
+  // ПРОВЕРКА ВЫХОДА
   if (rectsOverlap(player, level.exit) && !level.isBossLevel) {
     gameState = 'levelComplete';
     stateTimer = 0;
@@ -509,114 +511,4 @@ function update() {
     stateTimer = 0;
     sfx.gameover();
   }
-}
-
-function drawGame() {
-  const time = globalTime;
-  let shakeX = 0, shakeY = 0;
-  if (screenShake > 0.5) {
-    shakeX = (Math.random() - 0.5) * screenShake * 2;
-    shakeY = (Math.random() - 0.5) * screenShake * 2;
-  }
-
-  ctx.save();
-  ctx.translate(shakeX, shakeY);
-
-  drawBackground();
-
-  ctx.save();
-  ctx.translate(-camera.x, 0);
-
-  drawPlatforms();
-
-  if (!level.isBossLevel || bossDefeated) {
-    const exitPulse = Math.sin(time / 200) * 0.3 + 0.7;
-    const exitGlow = ctx.createRadialGradient(
-      level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 0,
-      level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 80
-    );
-    exitGlow.addColorStop(0, `rgba(100, 255, 100, ${0.4 * exitPulse})`);
-    exitGlow.addColorStop(1, 'rgba(100, 255, 100, 0)');
-    ctx.fillStyle = exitGlow;
-    ctx.beginPath();
-    ctx.arc(level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 80, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = `rgba(100, 255, 100, ${exitPulse})`;
-    ctx.fillRect(level.exit.x, level.exit.y, level.exit.w, level.exit.h);
-    ctx.strokeStyle = '#2ecc71';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(level.exit.x, level.exit.y, level.exit.w, level.exit.h);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('ВЫХОД', level.exit.x + level.exit.w / 2, level.exit.y - 10);
-    ctx.textAlign = 'left';
-  }
-
-  for (const o of octopuses) drawOctopus(o, time);
-  drawGoldenPower(goldenPower, time);
-  for (const e of enemies) drawEnemyGirl(e);
-  if (boss && boss.hp > 0) drawBoss(boss, time);
-
-  for (const b of bags) {
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.rotate(b.spin);
-    const bagGrad = ctx.createLinearGradient(-b.w / 2, -b.h / 2, b.w / 2, b.h / 2);
-    const c1 = b.isBossBag ? '#ff6666' : '#ff88cc';
-    const c2 = b.isBossBag ? '#8b0000' : '#c71585';
-    bagGrad.addColorStop(0, c1);
-    bagGrad.addColorStop(1, c2);
-    ctx.fillStyle = bagGrad;
-    roundRect(ctx, -b.w / 2, -b.h / 2, b.w, b.h, 3);
-    ctx.fill();
-    ctx.strokeStyle = b.isBossBag ? '#5a0000' : '#8b0040';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillRect(-b.w / 2 + 2, -b.h / 2 + 2, b.w / 3, 2);
-    ctx.restore();
-  }
-
-  for (const h of hammers) drawFlyingHammer(h, time);
-
-  for (const pt of particles) {
-    ctx.globalAlpha = pt.life / pt.maxLife;
-    if (pt.soft) {
-      const pgrad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, pt.size * 2);
-      pgrad.addColorStop(0, pt.color);
-      pgrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = pgrad;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, pt.size * 2, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      ctx.fillStyle = pt.color;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.globalAlpha = 1;
-
-  drawCharacter(player);
-  ctx.restore();
-
-  if (player.powerTimer > 0) {
-    const glow = 12 + Math.sin(Date.now() / 150) * 6;
-    ctx.strokeStyle = `rgba(255, 215, 0, 0.7)`;
-    ctx.lineWidth = glow;
-    ctx.strokeRect(glow / 2, glow / 2, W - glow, H - glow);
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(glow, glow, W - glow * 2, H - glow * 2);
-  }
-
-  ctx.restore();
-
-  applyPostProcessing();
-  drawHUD();
-
-  if (gameState === 'levelComplete') drawLevelComplete();
-  if (gameState === 'gameOver') drawGameOver();
 }
