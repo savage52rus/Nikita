@@ -5,7 +5,9 @@ function update() {
   if (gameState === 'levelComplete') {
     stateTimer++;
     
+    // Ждём 1.5 секунды (90 кадров)
     if (stateTimer > 90) {
+      // Если это был последний уровень (босс) — в меню
       if (currentLevel === LEVELS.length - 1) {
         gameState = 'menu';
         player = createPlayer();
@@ -14,8 +16,10 @@ function update() {
         return;
       }
       
+      // Иначе загружаем следующий уровень
       const nextLevel = currentLevel + 1;
       loadLevel(nextLevel); 
+      // loadLevel сам установит gameState = 'playing' и сбросит stateTimer
     }
     return;
   }
@@ -509,8 +513,8 @@ function update() {
   }
 }
 
-// ==================== ОТРИСОВКА ИГРОВОГО ЭКРАНА ====================
 function drawGame() {
+  // ... (остается без изменений) ...
   const time = globalTime;
   let shakeX = 0, shakeY = 0;
   if (screenShake > 0.5) {
@@ -520,12 +524,9 @@ function drawGame() {
 
   ctx.save();
   ctx.translate(shakeX, shakeY);
-
   drawBackground();
-
   ctx.save();
   ctx.translate(-camera.x, 0);
-
   drawPlatforms();
 
   if (!level.isBossLevel || bossDefeated) {
