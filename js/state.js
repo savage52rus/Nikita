@@ -91,6 +91,11 @@ function loadLevel(idx) {
       player.invuln = 0;
       player.hp = player.maxHp;
     }
+
+    // !!! ГЛАВНЫЙ ФИКС !!! 
+    // Принудительно переводим игру в режим геймплея
+    gameState = 'playing';
+
   } catch (err) {
     console.error("Ошибка при загрузке уровня:", err);
   }
