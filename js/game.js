@@ -5,9 +5,7 @@ function update() {
   if (gameState === 'levelComplete') {
     stateTimer++;
     
-    // Ждём 1.5 секунды (90 кадров)
     if (stateTimer > 90) {
-      // Если это был последний уровень (босс) — в меню
       if (currentLevel === LEVELS.length - 1) {
         gameState = 'menu';
         player = createPlayer();
@@ -16,10 +14,8 @@ function update() {
         return;
       }
       
-      // Иначе загружаем следующий уровень
       const nextLevel = currentLevel + 1;
       loadLevel(nextLevel); 
-      // loadLevel сам сбросит stateTimer в 0
     }
     return;
   }
@@ -511,4 +507,115 @@ function update() {
     stateTimer = 0;
     sfx.gameover();
   }
+}
+
+// ==================== ОТРИСОВКА ИГРОВОГО ЭКРАНА ====================
+function drawGame() {
+  const time = globalTime;
+  let shakeX = 0, shakeY = 0;
+  if (screenShake > 0.5) {
+    shakeX = (Math.random() - 0.5) * screenShake * 2;
+    shakeY = (Math.random() - 0.5) * screenShake * 2;
+  }
+
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
+
+  drawBackground();
+
+  ctx.save();
+  ctx.translate(-camera.x, 0);
+
+  drawPlatforms();
+
+  if (!level.isBossLevel || bossDefeated) {
+    const exitPulse = Math.sin(time / 200) * 0.3 + 0.7;
+    const exitGlow = ctx.createRadialGradient(
+      level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 0,
+      level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 80
+    );
+    exitGlow.addColorStop(0, `rgba(100, 255, 100, ${0.4 * exitPulse})`);
+    exitGlow.addColorStop(1, 'rgba(100, 255, 100, 0)');
+    ctx.fillStyle = exitGlow;
+    ctx.beginPath();
+    ctx.arc(level.exit.x + level.exit.w / 2, level.exit.y + level.exit.h / 2, 80, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = `rgba(100, 255, 100, ${exitPulse})`;
+    ctx.fillRect(level.exit.x, level.exit.y, level.exit.w, level.exit.h);
+    ctx.strokeStyle = '#2ecc71';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(level.exit.x, level.exit.y, level.exit.w, level.exit.h);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ВЫХОД', level.exit.x + level.exit.w / 2, level.exit.y - 10);
+    ctx.textAlign = 'left';
+  }
+
+  for (const o of octopuses) drawOctopus(o, time);
+  drawGoldenPower(goldenPower, time);
+  for (const e of enemies) drawEnemyGirl(e);
+  if (boss && boss.hp > 0) drawBoss(boss, time);
+
+  for (const b of bags) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.spin);
+    const bagGrad = ctx.createLinearGradient(-b.w / 2, -b.h / 2, b.w / 2, b.h / 2);
+    const c1 = b.isBossBag ? '#ff6666' : '#ff88cc';
+    const c2 = b.isBossBag ? '#8b0000' : '#c71585';
+    bagGrad.addColorStop(0, c1);
+    bagGrad.addColorStop(1, c2);
+    ctx.fillStyle = bagGrad;
+    roundRect(ctx, -b.w / 2, -b.h / 2, b.w, b.h, 3);
+    ctx.fill();
+    ctx.strokeStyle = b.isBossBag ? '#5a0000' : '#8b0040';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillRect(-b.w / 2 + 2, -b.h / 2 + 2, b.w / 3, 2);
+    ctx.restore();
+  }
+
+  for (const h of hammers) drawFlyingHammer(h, time);
+
+  for (const pt of particles) {
+    ctx.globalAlpha = pt.life / pt.maxLife;
+    if (pt.soft) {
+      const pgrad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, pt.size * 2);
+      pgrad.addColorStop(0, pt.color);
+      pgrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = pgrad;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size * 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = pt.color;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  drawCharacter(player);
+  ctx.restore();
+
+  if (player.powerTimer > 0) {
+    const glow = 12 + Math.sin(Date.now() / 150) * 6;
+    ctx.strokeStyle = `rgba(255, 215, 0, 0.7)`;
+    ctx.lineWidth = glow;
+    ctx.strokeRect(glow / 2, glow / 2, W - glow, H - glow);
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(glow, glow, W - glow * 2, H - glow * 2);
+  }
+
+  ctx.restore();
+
+  applyPostProcessing();
+  drawHUD();
+
+  if (gameState === 'levelComplete') drawLevelComplete();
+  if (gameState === 'gameOver') drawGameOver();
 }
