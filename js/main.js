@@ -1,23 +1,23 @@
 const keys = {};
 const mouse = { x: 0, y: 0, isDown: false };
 
-// Ждём, пока DOM полностью загрузится
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('html-start-btn');
   const musicBtn = document.getElementById('html-music-btn');
+  console.log("DOM загружен. Кнопка старта:", startBtn);
 
-  // Обработчик клавиатуры
+  // Клавиатура
   addEventListener('keydown', e => {
     keys[e.code] = true;
     if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
     if (e.code === 'KeyM') {
       soundEnabled = !soundEnabled;
-      updateMusicButtonVisual();
+      if (typeof updateMusicButtonVisual === 'function') updateMusicButtonVisual();
     }
   });
   addEventListener('keyup', e => keys[e.code] = false);
 
-  // Обработчик мыши
+  // Мышь
   canvas.addEventListener('mousemove', e => {
     const rect = canvas.getBoundingClientRect();
     mouse.x = (e.clientX - rect.left) * (W / rect.width);
@@ -26,8 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.addEventListener('mousedown', () => mouse.isDown = true);
   canvas.addEventListener('mouseup', () => mouse.isDown = false);
 
-  // Кнопка музыки
-  function updateMusicButtonVisual() {
+  // Музыка
+  window.updateMusicButtonVisual = function() {
     if (!musicBtn) return;
     if (soundEnabled) {
       musicBtn.textContent = '🎵';
@@ -36,36 +36,36 @@ document.addEventListener('DOMContentLoaded', () => {
       musicBtn.textContent = '🔇';
       musicBtn.classList.add('muted');
     }
-  }
-  window.updateMusicButtonVisual = updateMusicButtonVisual;
+  };
 
   if (musicBtn) {
     musicBtn.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
-      updateMusicButtonVisual();
-      if (soundEnabled && audio.state === 'suspended') {
-        audio.resume();
-      }
+      window.updateMusicButtonVisual();
+      if (soundEnabled && audio.state === 'suspended') audio.resume();
       playTone(600, 0.05, 'sine', 0.05);
     });
   }
 
-  // Кнопка старта
+  // Старт
   let isStarting = false;
   if (startBtn) {
     startBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log("Клик по кнопке старта. gameState:", gameState);
       if (isStarting || gameState !== 'menu') return;
       isStarting = true;
       
-      setTimeout(() => {
-        startGame();
-        isStarting = false;
-      }, 50);
+      // Принудительный запуск
+      console.log("Вызов startGame...");
+      startGame();
+      console.log("После startGame. gameState:", gameState, "Врагов:", enemies.length, "Осьминогов:", octopuses.length, "Платформ:", level ? level.platforms.length : "нет");
+      
+      isStarting = false;
     });
   }
 
-  // Касания по канвасу
+  // Касания
   canvas.addEventListener('touchstart', e => {
     e.preventDefault();
     const touch = e.touches[0];
@@ -84,10 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
       keys[keyCode] = true;
       if (keyCode === 'Space' && gameState === 'menu' && !isStarting) {
         isStarting = true;
-        setTimeout(() => {
-          startGame();
-          isStarting = false;
-        }, 50);
+        startGame();
+        isStarting = false;
       }
       if (keyCode === 'KeyE') btn.style.transform = 'scale(0.85)';
     };
@@ -111,10 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
   bindMobileButton('btn-action', 'Space');
   bindMobileButton('btn-throw', 'KeyE');
 
-  updateMusicButtonVisual();
+  window.updateMusicButtonVisual();
 });
 
-// --- Игровой цикл ---
 function updateHtmlStartButton() {
   const htmlBtn = document.getElementById('html-start-btn');
   if (!htmlBtn) return;
@@ -148,11 +145,11 @@ function draw() {
 function loop() {
   globalTime = Date.now();
   if (gameState !== 'menu') {
-    try { update(); } catch (err) { console.error("Ошибка в update():", err); }
+    try { update(); } catch (err) { console.error("Ошибка update:", err); }
   } else {
     menuTime += 16;
   }
-  try { draw(); } catch (err) { console.error("Ошибка в draw():", err); }
+  try { draw(); } catch (err) { console.error("Ошибка draw:", err); }
   requestAnimationFrame(loop);
 }
 
