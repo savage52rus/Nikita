@@ -2,7 +2,7 @@ function drawBackground() {
   const time = globalTime;
 
   if (currentLevel >= 3) {
-    // ... (оставим фон склада без изменений, он уже хорош, но можно добавить пыли) ...
+    // === СКЛАД ===
     const grad = ctx.createLinearGradient(0, 0, 0, H);
     if (currentLevel === 4) {
       grad.addColorStop(0, '#0a0a15'); grad.addColorStop(0.5, '#151520'); grad.addColorStop(1, '#0a0a15');
@@ -28,8 +28,6 @@ function drawBackground() {
       ctx.fillStyle = '#151520';
       ctx.fillRect(bx, 0, 8, H - 80); ctx.fillRect(bx + 172, 0, 8, H - 80);
       ctx.fillRect(bx, 40, 180, 10);
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
-      ctx.fillRect(bx + 2, 0, 2, H - 80);
     }
 
     const pipeOff = camera.x * 0.4;
@@ -67,7 +65,7 @@ function drawBackground() {
     return;
   }
 
-  // Городской пейзаж (улучшен)
+  // === ГОРОД ===
   const grad = ctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0, '#2a5a8a'); 
   grad.addColorStop(0.3, '#6bafd4');
@@ -76,7 +74,7 @@ function drawBackground() {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
-  // Солнце с мягким объемом
+  // Солнце
   const sunX = W * 0.8, sunY = 100;
   const sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 250);
   sunGlow.addColorStop(0, 'rgba(255, 255, 220, 0.9)');
@@ -85,11 +83,10 @@ function drawBackground() {
   sunGlow.addColorStop(1, 'rgba(255, 240, 150, 0)');
   ctx.fillStyle = sunGlow;
   ctx.beginPath(); ctx.arc(sunX, sunY, 250, 0, Math.PI * 2); ctx.fill();
-  
   ctx.fillStyle = '#fffbe0';
   ctx.beginPath(); ctx.arc(sunX, sunY, 40, 0, Math.PI * 2); ctx.fill();
 
-  // Облака (3D-объем)
+  // Облака
   for (let i = 0; i < 6; i++) {
     const cx = ((i * 300 + time * 0.01) % (W + 400)) - 200;
     const cy = 60 + i * 40;
@@ -101,8 +98,7 @@ function drawBackground() {
     ctx.beginPath(); ctx.ellipse(cx, cy, 100, 35, 0, 0, Math.PI * 2); ctx.fill();
   }
 
-  // Дальние здания (воздушная перспектива)
-  ctx.fillStyle = '#9aabb8';
+  // Дальние здания
   const bgOff = camera.x * 0.15;
   for (let i = 0; i < 20; i++) {
     const bx = (i * 200 - bgOff % 200) - 100;
@@ -113,7 +109,7 @@ function drawBackground() {
     ctx.fillRect(bx, H - 80 - bh, 130, bh);
   }
   
-  // Ближние здания (с объемом и окнами)
+  // Ближние здания
   const midOff = camera.x * 0.4;
   for (let i = 0; i < 20; i++) {
     const bx = (i * 250 - midOff % 250) - 100;
@@ -123,7 +119,7 @@ function drawBackground() {
     ctx.fillStyle = bldGrad;
     ctx.fillRect(bx, H - 80 - bh, 160, bh);
     
-    // Окна (светящиеся с объемом)
+    // Окна
     for (let wy = H - 70 - bh; wy < H - 90; wy += 25) {
       for (let wx = bx + 15; wx < bx + 145; wx += 30) {
         if ((wx + wy) % 7 < 4) {
@@ -136,7 +132,7 @@ function drawBackground() {
     }
   }
 
-  // Атмосферная дымка внизу
+  // Дымка
   const haze = ctx.createLinearGradient(0, H * 0.6, 0, H);
   haze.addColorStop(0, 'rgba(200, 220, 240, 0)');
   haze.addColorStop(1, 'rgba(200, 220, 240, 0.4)');
@@ -144,18 +140,69 @@ function drawBackground() {
   ctx.fillRect(0, 0, W, H);
 }
 
-// Платформы (без изменений, они хороши)
-// ... функция drawPlatforms остается прежней ...
+// ==================== ПЛАТФОРМЫ ====================
+function drawPlatforms() {
+  if (!level || !level.platforms) return;
+
+  for (const p of level.platforms) {
+    if (currentLevel >= 3) {
+      // Склад (ящики)
+      if (p.w >= 100 && p.h >= 15) {
+        const boxGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+        boxGrad.addColorStop(0, '#a06a3a');
+        boxGrad.addColorStop(0.5, '#8b5a2b');
+        boxGrad.addColorStop(1, '#5a3a1a');
+        ctx.fillStyle = boxGrad;
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.strokeStyle = '#5a3a1a';
+        ctx.lineWidth = 1;
+        for (let bx = p.x + 10; bx < p.x + p.w; bx += 15) {
+          ctx.beginPath();
+          ctx.moveTo(bx, p.y + 2);
+          ctx.lineTo(bx, p.y + p.h - 2);
+          ctx.stroke();
+        }
+        ctx.fillStyle = 'rgba(255, 220, 180, 0.4)';
+        ctx.fillRect(p.x, p.y, p.w, 3);
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(p.x, p.y + p.h - 3, p.w, 3);
+        ctx.strokeStyle = '#3a2010';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(p.x, p.y, p.w, p.h);
+        ctx.fillStyle = '#888';
+        ctx.fillRect(p.x, p.y, 4, 4);
+        ctx.fillRect(p.x + p.w - 4, p.y, 4, 4);
+      }
+    } else {
+      // Город / Парк (трава)
+      const grassGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+      grassGrad.addColorStop(0, '#5e9e4a');
+      grassGrad.addColorStop(0.5, '#4a7c3a');
+      grassGrad.addColorStop(1, '#3a5c2a');
+      ctx.fillStyle = grassGrad;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.fillStyle = '#6ebe5a';
+      ctx.fillRect(p.x, p.y, p.w, 4);
+      for (let tx = p.x + 5; tx < p.x + p.w - 5; tx += 8) {
+        const h = 4 + Math.sin(tx * 0.3 + globalTime * 0.002) * 2;
+        ctx.fillStyle = '#7ece6a';
+        ctx.fillRect(tx, p.y - h, 2, h);
+      }
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(p.x, p.y + p.h - 3, p.w, 3);
+      ctx.fillStyle = 'rgba(255, 255, 200, 0.2)';
+      ctx.fillRect(p.x, p.y + 4, p.w, 2);
+    }
+  }
+}
 
 function applyPostProcessing() {
-  // Виньетка
   const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.9);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
   vignette.addColorStop(1, 'rgba(0,0,0,0.45)');
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
 
-  // Цветокоррекция (легкая насыщенность)
   ctx.globalCompositeOperation = 'overlay';
   ctx.fillStyle = 'rgba(255, 200, 100, 0.05)';
   ctx.fillRect(0, 0, W, H);
