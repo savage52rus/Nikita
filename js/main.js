@@ -4,7 +4,6 @@ const mouse = { x: 0, y: 0, isDown: false };
 document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('html-start-btn');
   const musicBtn = document.getElementById('html-music-btn');
-  console.log("DOM загружен. Кнопка старта:", startBtn);
 
   // Клавиатура
   addEventListener('keydown', e => {
@@ -47,21 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Старт
+  // Старт (защита от двойного клика)
   let isStarting = false;
   if (startBtn) {
     startBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      console.log("Клик по кнопке старта. gameState:", gameState);
       if (isStarting || gameState !== 'menu') return;
       isStarting = true;
       
-      // Принудительный запуск
-      console.log("Вызов startGame...");
-      startGame();
-      console.log("После startGame. gameState:", gameState, "Врагов:", enemies.length, "Осьминогов:", octopuses.length, "Платформ:", level ? level.platforms.length : "нет");
-      
-      isStarting = false;
+      // Небольшая задержка для мобильных устройств
+      setTimeout(() => {
+        startGame();
+        isStarting = false;
+      }, 50);
     });
   }
 
@@ -82,11 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const press = (e) => {
       e.preventDefault();
       keys[keyCode] = true;
+      
+      // Запуск игры по кнопке A
       if (keyCode === 'Space' && gameState === 'menu' && !isStarting) {
         isStarting = true;
-        startGame();
-        isStarting = false;
+        setTimeout(() => {
+          startGame();
+          isStarting = false;
+        }, 50);
       }
+      
       if (keyCode === 'KeyE') btn.style.transform = 'scale(0.85)';
     };
     
