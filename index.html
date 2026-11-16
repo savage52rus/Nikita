@@ -10,13 +10,10 @@
   <div id="game-container">
     <div id="canvas-wrapper">
       <canvas id="game" width="960" height="540"></canvas>
-      
-      <!-- Кнопки поверх канваса -->
       <button id="html-start-btn"></button>
       <button id="html-music-btn" title="Вкл/Выкл музыку">🎵</button>
     </div>
     
-    <!-- Виртуальные кнопки для смартфона -->
     <div id="mobile-controls">
       <div class="dpad">
         <button class="btn" id="btn-left">◀</button>
@@ -29,17 +26,18 @@
     </div>
   </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/player.js"></script>
-  <script src="js/enemies.js"></script>
-  <script src="js/items.js"></script>
-  <script src="js/background.js"></script>
-  <script src="js/hud.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/main.js"></script>
+  <!-- Добавлен defer, чтобы скрипты выполнялись после построения DOM -->
+  <script defer src="js/config.js"></script>
+  <script defer src="js/audio.js"></script>
+  <script defer src="js/utils.js"></script>
+  <script defer src="js/state.js"></script>
+  <script defer src="js/player.js"></script>
+  <script defer src="js/enemies.js"></script>
+  <script defer src="js/items.js"></script>
+  <script defer src="js/background.js"></script>
+  <script defer src="js/hud.js"></script>
+  <script defer src="js/menu.js"></script>
+  <script defer src="js/game.js"></script>
+  <script defer src="js/main.js"></script>
 </body>
 </html>
